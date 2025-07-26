@@ -23,6 +23,11 @@ main :: proc() {
 		return
 	}
 
+	if args[1] == "help" || args[1] == "--help" {
+		print_help()
+		return
+	}
+
 	if strconv.atoi(args[1]) == 0 {
 		styled_print(
 			"\n%s%sIncorrect port arg:%s Only integer values greater than 1 are accepted",
@@ -96,8 +101,32 @@ main :: proc() {
 }
 
 print_help :: proc() {
-	styled_print("%s%sUsage:", BOLD, CYAN)
-	styled_print("  kill-port %s<port number>", YELLOW)
+	styled_print("%skill-port - Kill a process running on specified port", BOLD)
+	fmt.println()
+
+	styled_print("%sUSAGE:", BOLD)
+	styled_print("    kill-port %s<PORT>", CYAN)
+	fmt.println()
+
+	styled_print("%sARGUMENTS:", BOLD)
+	styled_print("    %s<PORT>    Port number to check and kill process on (1-65535)", CYAN)
+	fmt.println()
+
+	// styled_print("%sOPTIONS:", BOLD)
+	// styled_print("    %s-h, --help     Show this help message", YELLOW)
+	// styled_print("    %s-v, --verbose  Show detailed output", YELLOW)
+	// styled_print("    %s-f, --force    Force kill without confirmation", YELLOW)
+	// styled_print("    %s-q, --quiet    Suppress all output except errors", YELLOW)
+	// fmt.println()
+
+	styled_print("%sEXAMPLES:", BOLD)
+	styled_print("    kill-port 3000              %s# Kill process on port 3000", DIM)
+	// styled_print("    kill-port 8080 --verbose    %s# Kill port 8080 with detailed output", DIM)
+	// styled_print("    kill-port 5432 --force      %s# Force kill without confirmation", DIM)
+	fmt.println()
+
+	styled_print("%sNOTES:", BOLD)
+	fmt.println("    • If no process is found on the specified port, no action is taken")
 }
 
 // Color constants
