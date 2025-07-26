@@ -23,7 +23,7 @@ main :: proc() {
 		return
 	}
 
-	if args[1] == "help" || args[1] == "--help" {
+	if args[1] == "-h" || args[1] == "--help" {
 		print_help()
 		return
 	}
@@ -112,8 +112,8 @@ print_help :: proc() {
 	styled_print("    %s<PORT>    Port number to check and kill process on (1-65535)", CYAN)
 	fmt.println()
 
-	// styled_print("%sOPTIONS:", BOLD)
-	// styled_print("    %s-h, --help     Show this help message", YELLOW)
+	styled_print("%sOPTIONS:", BOLD)
+	styled_print("    %s-h, --help     Show this help message", YELLOW)
 	// styled_print("    %s-v, --verbose  Show detailed output", YELLOW)
 	// styled_print("    %s-f, --force    Force kill without confirmation", YELLOW)
 	// styled_print("    %s-q, --quiet    Suppress all output except errors", YELLOW)
