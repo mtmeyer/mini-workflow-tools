@@ -1,36 +1,52 @@
 package main
 
+import "base:runtime"
+import "core:c/libc"
 import "core:fmt"
 import os "core:os/os2"
 import "core:strconv"
 import "core:strings"
+import "core:sys/posix"
+import "core:time"
 
 main :: proc() {
 	args := os.args
 
 	if len(args) == 1 {
-		fmt.println("Usage: kill-port <port number>")
+		print_help()
 		return
 	}
 
 	if len(args) > 2 {
-		fmt.println("Too many arguments")
-		fmt.println("Usage: kill-port <port number>")
+		styled_print("\n%s%sInvalid usage:%s too many args passed in\n", BOLD, RED, RESET)
+		print_help()
 		return
 	}
 
 	if strconv.atoi(args[1]) == 0 {
-		fmt.println("Incorrect port argument \n Only pass in an integer value greater than 1")
+		styled_print(
+			"\n%s%sIncorrect port arg:%s Only integer values greater than 1 are accepted",
+			BOLD,
+			RED,
+			RESET,
+		)
+		return
 	}
 
-	command: []string = {"lsof", "-i", fmt.aprintf("tcp:%s", args[1])}
+	lsof_command: []string = {"lsof", "-i", fmt.aprintf("tcp:%s", args[1])}
 
-	fmt.println(command)
-
-	_, stdout, _, err := os.process_exec(os.Process_Desc{command = command[:]}, context.allocator)
+	_, stdout, _, err := os.process_exec(
+		os.Process_Desc{command = lsof_command[:]},
+		context.allocator,
+	)
 
 	if err != nil {
 		fmt.panicf("Error executing command")
+	}
+
+	if len(stdout) == 0 {
+		styled_print("\nNo process with port %s%s%s found", YELLOW, args[1], RESET)
+		return
 	}
 
 	lines := strings.split_lines(string(stdout))
@@ -43,6 +59,11 @@ main :: proc() {
 		}
 	}
 
+	if len(target) == 0 {
+		styled_print("\nNo active process with port %s%s%s found", YELLOW, args[1], RESET)
+		return
+	}
+
 	splitStr := strings.split_after(target, " ")
 
 	processInfo: [dynamic]string
@@ -53,12 +74,10 @@ main :: proc() {
 		}
 	}
 
-	command2: []string = {"kill", "-9", strings.trim(processInfo[1], " ")}
-
-	fmt.println(command2)
+	kill_command: []string = {"kill", "-9", strings.trim(processInfo[1], " ")}
 
 	_, stdout2, _, err2 := os.process_exec(
-		os.Process_Desc{command = command2[:]},
+		os.Process_Desc{command = kill_command[:]},
 		context.allocator,
 	)
 
@@ -66,5 +85,50 @@ main :: proc() {
 		fmt.panicf("Error executing command")
 	}
 
-	fmt.println(string(stdout2))
+	styled_print(
+		"\n%s%sSuccessfully%s killed process on port %s%s",
+		GREEN,
+		BOLD,
+		RESET,
+		YELLOW,
+		args[1],
+	)
+}
+
+print_help :: proc() {
+	styled_print("%s%sUsage:", BOLD, CYAN)
+	styled_print("  kill-port %s<port number>", YELLOW)
+}
+
+// Color constants
+BLACK :: "\033[30m"
+RED :: "\033[31m"
+GREEN :: "\033[32m"
+YELLOW :: "\033[33m"
+BLUE :: "\033[34m"
+MAGENTA :: "\033[35m"
+CYAN :: "\033[36m"
+WHITE :: "\033[37m"
+
+// Formatting
+BOLD :: "\033[1m"
+UNDERLINE :: "\033[4m"
+ITALIC :: "\033[3m"
+DIM :: "\033[2m"
+
+// Background colors
+BG_RED :: "\033[41m"
+BG_GREEN :: "\033[42m"
+BG_YELLOW :: "\033[43m"
+BG_BLUE :: "\033[44m"
+BG_MAGENTA :: "\033[45m"
+BG_CYAN :: "\033[46m"
+BG_WHITE :: "\033[47m"
+
+// Reset
+RESET :: "\033[0m"
+
+styled_print :: proc(text: string, args: ..any) {
+	with_reset := fmt.aprintf("%s%s\n", text, RESET)
+	fmt.printf(with_reset, ..args)
 }
