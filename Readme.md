@@ -6,4 +6,5 @@ production ready robust code, purely created as a learning exercise and to strea
 ## Tools
 
 *   **kill-port:** A utility to kill a process running on a specific port.
+*   **runner:** A simple command runner.
 *   **cli:** A collection of Odin modules used to build the tools in this repo (e.g., colors, spinners).

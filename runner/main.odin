@@ -1,12 +1,13 @@
 package main
 
 import "../cli"
+import "base:runtime"
 import "core:encoding/ini"
+import "core:encoding/json"
 import "core:fmt"
 import os "core:os/os2"
 import "core:path/filepath"
-import "core:sys/wasm/wasi"
-import "core:thread"
+import "core:sys/posix"
 
 config: map[string]Config_Item
 
@@ -16,24 +17,12 @@ Thread_Data :: struct {
 	stdout:  []byte,
 }
 
-thread_proc :: proc(t: ^thread.Thread) {
-	fmt.println("Thread starting")
-	d := (^Thread_Data)(t.data)
-	_, stdout, _, err := os.process_exec(
-		os.Process_Desc{command = d.command[:]},
-		context.allocator,
-	)
-
-	fmt.print(string(stdout))
-
-	d.stdout = stdout
-	fmt.println("Thread finishing")
-}
-
-
 main :: proc() {
-	defer delete(config)
+	// Clean up when user ctrl + c
+	posix.signal(posix.Signal.SIGINT, clean_up)
+
 	parse_config()
+	defer delete(config)
 
 	args := os.args
 	task := args[1]
@@ -43,30 +32,30 @@ main :: proc() {
 		return
 	}
 
-	fmt.printfln("Command: %s \nDirectory: %s", config[task].command, config[task].dir)
+	dir := get_dir(config[task].dir)
 
-	// d := Thread_Data {
-	// 	command = {"npx", "http-server", "./", "-p", "1234"},
-	// 	dir     = "./",
-	// }
-	//
-	// t := thread.create(thread_proc)
-	// assert(t != nil)
-	// t.data = &d
-	//
-	// // Exactly when `thread_proc` starts running isn't certain. The operating
-	// // system will schedule it to start soon.
-	// thread.start(t)
-	//
-	// // thread.join waits for thread to finish. It will block until it is done.
-	// thread.join(t)
-	// thread.destroy(t)
-	//
-	// fmt.print(string(d.stdout))
+	if !os.is_dir(dir) {
+		cli.styled_print("\n%sDirectory provided for task doesn't exist", cli.RED)
+		os.exit(1)
+	}
+
+	p, err := os.process_start(
+		{
+			command = config[task].command,
+			stdout = os.stderr,
+			stderr = os.stderr,
+			working_dir = dir,
+		},
+	)
+	assert(err == nil)
+
+	state, werr := os.process_wait(p)
+	assert(werr == nil)
+	assert(state.success)
 }
 
 Config_Item :: struct {
-	command: string,
+	command: []string,
 	dir:     string,
 }
 
@@ -79,8 +68,6 @@ parse_config :: proc() {
 	}
 
 	config_location := filepath.join({cwd, "Runfile"})
-
-	fmt.println(config_location)
 
 	if !os.is_file(config_location) {
 		cli.styled_print(
@@ -100,10 +87,41 @@ parse_config :: proc() {
 	}
 
 	for key, item in raw_config {
+		cmd: []string
+
+		json_err := json.unmarshal(transmute([]u8)item["cmd"], &cmd)
+
+		if json_err != nil {
+			cli.styled_print("%sInvalid `cmd` value for task", cli.RED)
+			fmt.print(json_err)
+		}
+
 		config_item := Config_Item {
-			command = item["cmd"],
+			command = cmd,
 			dir     = item["dir"],
 		}
 		config[key] = config_item
 	}
+}
+
+get_dir :: proc(dir: string) -> string {
+	working_dir, err := os.get_working_directory(context.temp_allocator)
+
+	assert(err == nil)
+
+	if len(dir) == 0 {
+		return working_dir
+	}
+
+	path, join_err := filepath.join({working_dir, dir}, context.temp_allocator)
+
+	assert(join_err == nil)
+
+	return path
+}
+
+clean_up :: proc "c" (_: posix.Signal) {
+	context = runtime.default_context()
+	delete(config)
+	os.exit(0)
 }

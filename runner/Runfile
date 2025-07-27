@@ -1,3 +1,9 @@
+# Example config file for testing
+
 [run]
-cmd = "echo 'some command'"
+cmd = ["echo", "'some command'"]
+dir = "./"
+
+[server]
+cmd = ["npx", "http-server", "./", "-p", "1234"]
 dir = "./"
