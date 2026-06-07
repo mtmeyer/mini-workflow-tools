@@ -8,4 +8,5 @@ Options :: struct {
 	json:            bool,
 	full:            bool,
 	blocking:        string,
+	status:          string,
 }

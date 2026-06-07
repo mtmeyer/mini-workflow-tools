@@ -27,3 +27,18 @@ generateId :: proc() -> string {
 
 	return string(bytes)
 }
+
+validateStatusString :: proc(status: string) -> (ok: bool) {
+	switch status {
+	case "todo":
+		ok = true
+	case "completed":
+		ok = true
+	case "cancelled":
+		ok = true
+	case:
+		ok = false
+	}
+
+	return
+}

@@ -4,6 +4,7 @@ import "../../cli"
 import "../utils"
 import "core:encoding/json"
 import "core:fmt"
+import "core:os"
 import "core:strings"
 
 executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile, dataFilePath: string) {
@@ -12,8 +13,8 @@ executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile, dataFil
 		list(data, cliOpts.json, cliOpts.full)
 	case "create":
 		create(data, dataFilePath, cliOpts.subCommandInput, cliOpts.description, cliOpts.blocking)
-	case "delete":
-		delete(data)
+	case "update-status":
+		updateStatus(data, dataFilePath, cliOpts.subCommandInput, cliOpts.status)
 	case:
 		// TODO: Print help for tasks subcommand
 		fmt.print("Command not supported")
@@ -115,6 +116,25 @@ create :: proc(
 	utils.putDataFile(dataFilePath, data)
 }
 
-delete :: proc(data: ^utils.DataFile) {
-	fmt.print("DELETE")
+updateStatus :: proc(data: ^utils.DataFile, dataFilePath: string, id: string, status: string) {
+	statusOk := utils.validateStatusString(status)
+
+	if !statusOk {
+		fmt.eprintfln(
+			"Status '%s' is invalid. Must be either 'todo', 'completed' or 'cancelled'",
+			status,
+		)
+
+		os.exit(1)
+	}
+
+	for &task in data.tasks {
+		if task.id != id {
+			continue
+		}
+
+		task.status = status
+	}
+
+	utils.putDataFile(dataFilePath, data)
 }

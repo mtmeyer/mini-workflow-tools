@@ -4,7 +4,7 @@
             "id": "abc123",
             "name": "Some test task",
             "description": "Lorem ipsum dolor sit amet",
-            "status": "todo",
+            "status": "completed",
             "blocking": [
 
             ]
