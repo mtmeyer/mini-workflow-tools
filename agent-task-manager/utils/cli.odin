@@ -11,5 +11,5 @@ Options :: struct {
 	blocking:        string,
 	status:          string,
 	name:            string,
-	showArchived:    bool,
+	showArchived:    bool `args:"name=show-archived"`,
 }

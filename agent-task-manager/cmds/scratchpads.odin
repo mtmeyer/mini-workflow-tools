@@ -28,9 +28,10 @@ executeScratchpadSubcommand :: proc(
 			cliOpts.name,
 			cliOpts.content,
 		)
+	case "help":
+		renderHelp(.Scratchpads)
 	case:
-		// TODO: Print help for tasks subcommand
-		fmt.print("Command not supported")
+		renderHelp(.Scratchpads)
 	}
 }
 

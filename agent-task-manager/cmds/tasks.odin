@@ -36,6 +36,8 @@ executeTaskSubcommand :: proc(
 		)
 	case "set-status":
 		setStatusForTask(data, dataFilePath, cliOpts.subCommandInput, cliOpts.status)
+	case "help":
+		renderHelp(.Tasks)
 	case:
 		renderHelp(.Tasks)
 	}
