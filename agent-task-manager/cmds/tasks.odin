@@ -13,8 +13,17 @@ executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile, dataFil
 		list(data, cliOpts.json, cliOpts.full, cliOpts.status)
 	case "create":
 		create(data, dataFilePath, cliOpts.subCommandInput, cliOpts.description, cliOpts.blocking)
-	case "update-status":
-		updateStatus(data, dataFilePath, cliOpts.subCommandInput, cliOpts.status)
+	case "update":
+		update(
+			data,
+			dataFilePath,
+			cliOpts.subCommandInput,
+			cliOpts.name,
+			cliOpts.description,
+			cliOpts.blocking,
+		)
+	case "set-status":
+		setStatus(data, dataFilePath, cliOpts.subCommandInput, cliOpts.status)
 	case:
 		// TODO: Print help for tasks subcommand
 		fmt.print("Command not supported")
@@ -109,7 +118,7 @@ create :: proc(
 	dataFilePath: string,
 	name: string,
 	description: string,
-	blocking: string = "",
+	blocking: string,
 ) {
 	todoId := utils.generateId()
 
@@ -130,7 +139,38 @@ create :: proc(
 	utils.putDataFile(dataFilePath, data)
 }
 
-updateStatus :: proc(data: ^utils.DataFile, dataFilePath: string, id: string, status: string) {
+update :: proc(
+	data: ^utils.DataFile,
+	dataFilePath: string,
+	id: string,
+	name: string,
+	description: string,
+	blocking: string,
+) {
+	updatedTask: ^utils.Task
+	for &task in data.tasks {
+		if task.id != id {
+			continue
+		}
+		if len(name) > 0 {
+			task.name = name
+		}
+
+		if len(description) > 0 {
+			task.description = description
+		}
+
+		if len(blocking) > 0 {
+			blockedTasks := strings.split(blocking, ",")
+			task.blocking = blockedTasks
+		}
+
+	}
+
+	utils.putDataFile(dataFilePath, data)
+}
+
+setStatus :: proc(data: ^utils.DataFile, dataFilePath: string, id: string, status: string) {
 	statusOk := utils.validateStatusString(status)
 
 	if !statusOk {

@@ -9,4 +9,5 @@ Options :: struct {
 	full:            bool,
 	blocking:        string,
 	status:          string,
+	name:            string,
 }

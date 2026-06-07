@@ -50,8 +50,6 @@ parseDataFile :: proc(filePath: string) -> (^DataFile, bool) {
 }
 
 putDataFile :: proc(filePath: string, data: ^DataFile) -> bool {
-	fmt.printfln("%v", data)
-
 	jsonData, err := json.marshal(data^, {pretty = true, use_spaces = true, spaces = 4})
 
 	if err != nil {
