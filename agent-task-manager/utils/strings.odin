@@ -32,7 +32,7 @@ validateStatusString :: proc(status: string) -> (ok: bool) {
 	switch status {
 	case "todo":
 		ok = true
-	case "completed":
+	case "done":
 		ok = true
 	case "cancelled":
 		ok = true

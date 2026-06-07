@@ -10,7 +10,7 @@ import "core:strings"
 executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile, dataFilePath: string) {
 	switch cmdString := cliOpts.subCommand; cmdString {
 	case "list":
-		list(data, cliOpts.json, cliOpts.full)
+		list(data, cliOpts.json, cliOpts.full, cliOpts.status)
 	case "create":
 		create(data, dataFilePath, cliOpts.subCommandInput, cliOpts.description, cliOpts.blocking)
 	case "update-status":
@@ -21,7 +21,12 @@ executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile, dataFil
 	}
 }
 
-list :: proc(data: ^utils.DataFile, jsonFlag: bool = false, fullFlag: bool = false) {
+list :: proc(
+	data: ^utils.DataFile,
+	jsonFlag: bool = false,
+	fullFlag: bool = false,
+	status: string,
+) {
 	tasks := data.tasks
 
 	if jsonFlag {
@@ -41,7 +46,16 @@ list :: proc(data: ^utils.DataFile, jsonFlag: bool = false, fullFlag: bool = fal
 
 	linesToRender: [dynamic]string
 
+	resolvedStatus := status
+	if len(status) == 0 {
+		resolvedStatus = "todo"
+	}
+
 	for task in tasks {
+		if resolvedStatus != "all" && resolvedStatus != task.status {
+			continue
+		}
+
 		append(
 			&linesToRender,
 			fmt.tprintf(
@@ -121,7 +135,7 @@ updateStatus :: proc(data: ^utils.DataFile, dataFilePath: string, id: string, st
 
 	if !statusOk {
 		fmt.eprintfln(
-			"Status '%s' is invalid. Must be either 'todo', 'completed' or 'cancelled'",
+			"Status '%s' is invalid. Must be either 'todo', 'done' or 'cancelled'",
 			status,
 		)
 
