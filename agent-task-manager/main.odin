@@ -38,6 +38,8 @@ main :: proc() {
 		cmds.executeTaskSubcommand(opt, data, filePath)
 	case "scratchpads":
 		cmds.executeScratchpadSubcommand(opt, data, filePath)
+	case "help":
+		cmds.renderHelp(.Base)
 	case:
 		cmds.renderHelp(.Base)
 	}
