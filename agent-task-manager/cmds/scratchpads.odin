@@ -6,6 +6,7 @@ import "core:encoding/json"
 import "core:fmt"
 import "core:os"
 import "core:strings"
+import "core:text/scanner"
 
 executeScratchpadSubcommand :: proc(
 	cliOpts: utils.Options,
@@ -14,28 +15,66 @@ executeScratchpadSubcommand :: proc(
 ) {
 	switch cmdString := cliOpts.subCommand; cmdString {
 	case "list":
-		listScratchpads(data, cliOpts.json, cliOpts.full, cliOpts.status)
+		listScratchpads(data, cliOpts.json, cliOpts.showArchived)
 	case "create":
-		createScratchpad(
-			data,
-			dataFilePath,
-			cliOpts.subCommandInput,
-			cliOpts.description,
-			cliOpts.blocking,
-		)
+		createScratchpad(data, dataFilePath, cliOpts.subCommandInput, cliOpts.content)
 	case "update":
 		updateScratchpad(
 			data,
 			dataFilePath,
 			cliOpts.subCommandInput,
 			cliOpts.name,
-			cliOpts.description,
-			cliOpts.blocking,
+			cliOpts.content,
 		)
 	case:
 		// TODO: Print help for tasks subcommand
 		fmt.print("Command not supported")
 	}
+}
+
+listScratchpads :: proc(data: ^utils.DataFile, jsonFlag: bool = false, showArchived: bool) {
+	scratchpads := data.scratchpads
+
+	if jsonFlag {
+		pretty, err := json.marshal(
+			scratchpads,
+			json.Marshal_Options{pretty = true, use_spaces = true, spaces = 4},
+		)
+
+		if err != nil {
+			fmt.eprintln(err)
+			return
+		}
+		fmt.println(string(pretty))
+		return
+	}
+
+	if len(scratchpads) == 0 {
+		fmt.println("No scratchpads created yet...")
+		return
+	}
+
+	linesToRender: [dynamic]string
+
+	for scratchpad in scratchpads {
+		if !showArchived && scratchpad.archived {
+			continue
+		}
+
+		append(
+			&linesToRender,
+			fmt.tprintf(
+				"%s%s%s:%s %s",
+				cli.BOLD,
+				cli.CYAN,
+				scratchpad.id,
+				cli.RESET,
+				utils.truncate(scratchpad.name, 80),
+			),
+		)
+	}
+
+	fmt.println(strings.join(linesToRender[:], "\n"))
 }
 
 createScratchpad :: proc(
@@ -55,6 +94,8 @@ createScratchpad :: proc(
 	append(&data.scratchpads, newScratchpad)
 
 	utils.putDataFile(dataFilePath, data)
+
+	fmt.printfln("%s%s Scratchpad created:%s %s", cli.BOLD, cli.GREEN, cli.RESET, scratchpadId)
 }
 
 updateScratchpad :: proc(

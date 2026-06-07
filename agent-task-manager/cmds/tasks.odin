@@ -40,7 +40,7 @@ executeTaskSubcommand :: proc(
 	}
 }
 
-listTask :: proc(
+listTasks :: proc(
 	data: ^utils.DataFile,
 	jsonFlag: bool = false,
 	fullFlag: bool = false,
@@ -62,6 +62,10 @@ listTask :: proc(
 		return
 	}
 
+	if len(tasks) == 0 {
+		fmt.println("No tasks created yet...")
+		return
+	}
 
 	linesToRender: [dynamic]string
 
@@ -107,7 +111,6 @@ listTask :: proc(
 		}
 	}
 
-
 	fmt.println(strings.join(linesToRender[:], "\n"))
 }
 
@@ -147,6 +150,8 @@ createTask :: proc(
 	append(&data.tasks, newTodo)
 
 	utils.putDataFile(dataFilePath, data)
+
+	fmt.printfln("%s%s Task created:%s %s", cli.BOLD, cli.GREEN, cli.RESET, todoId)
 }
 
 updateTask :: proc(

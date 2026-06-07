@@ -49,6 +49,23 @@
         }
     ],
     "scratchpads": [
-
+        {
+            "id": "3PYuYbvM",
+            "name": "First scratchpad",
+            "content": "Here is some deep content for the scratchpad",
+            "archived": false
+        },
+        {
+            "id": "qEPiMvVH",
+            "name": "Second scratchpad",
+            "content": "Here is some deep content for the scratchpadasdasasdd",
+            "archived": false
+        },
+        {
+            "id": "N9oJQvT6",
+            "name": "Third scratchpad",
+            "content": "Here is some deep content for the scratchpadasdasasddasd asd asd asd asd asd asd asd asd asd asd\\nasd asd asd ",
+            "archived": false
+        }
     ]
 }

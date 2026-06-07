@@ -19,9 +19,10 @@ Task :: struct {
 }
 
 Scratchpad :: struct {
-	id:      string,
-	name:    string,
-	content: string,
+	id:       string,
+	name:     string,
+	content:  string,
+	archived: bool,
 }
 
 DataFile :: struct {

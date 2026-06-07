@@ -36,7 +36,7 @@ main :: proc() {
 	switch command := opt.command; command {
 	case "tasks":
 		cmds.executeTaskSubcommand(opt, data, filePath)
-	case "scratchpad":
+	case "scratchpads":
 		cmds.executeScratchpadSubcommand(opt, data, filePath)
 	case:
 		cmds.renderHelp(.Base)
