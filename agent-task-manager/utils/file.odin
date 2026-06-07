@@ -19,6 +19,7 @@ Task :: struct {
 }
 
 Scratchpad :: struct {
+	id:      string,
 	name:    string,
 	content: string,
 }

@@ -7,14 +7,24 @@ import "core:fmt"
 import "core:os"
 import "core:strings"
 
-executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile, dataFilePath: string) {
+executeTaskSubcommand :: proc(
+	cliOpts: utils.Options,
+	data: ^utils.DataFile,
+	dataFilePath: string,
+) {
 	switch cmdString := cliOpts.subCommand; cmdString {
 	case "list":
-		list(data, cliOpts.json, cliOpts.full, cliOpts.status)
+		listTasks(data, cliOpts.json, cliOpts.full, cliOpts.status)
 	case "create":
-		create(data, dataFilePath, cliOpts.subCommandInput, cliOpts.description, cliOpts.blocking)
+		createTask(
+			data,
+			dataFilePath,
+			cliOpts.subCommandInput,
+			cliOpts.description,
+			cliOpts.blocking,
+		)
 	case "update":
-		update(
+		updateTask(
 			data,
 			dataFilePath,
 			cliOpts.subCommandInput,
@@ -23,14 +33,14 @@ executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile, dataFil
 			cliOpts.blocking,
 		)
 	case "set-status":
-		setStatus(data, dataFilePath, cliOpts.subCommandInput, cliOpts.status)
+		setStatusForTask(data, dataFilePath, cliOpts.subCommandInput, cliOpts.status)
 	case:
 		// TODO: Print help for tasks subcommand
 		fmt.print("Command not supported")
 	}
 }
 
-list :: proc(
+listTask :: proc(
 	data: ^utils.DataFile,
 	jsonFlag: bool = false,
 	fullFlag: bool = false,
@@ -113,7 +123,7 @@ getOutputTaskStatus :: proc(status: string) -> string {
 	return ""
 }
 
-create :: proc(
+createTask :: proc(
 	data: ^utils.DataFile,
 	dataFilePath: string,
 	name: string,
@@ -139,7 +149,7 @@ create :: proc(
 	utils.putDataFile(dataFilePath, data)
 }
 
-update :: proc(
+updateTask :: proc(
 	data: ^utils.DataFile,
 	dataFilePath: string,
 	id: string,
@@ -147,7 +157,6 @@ update :: proc(
 	description: string,
 	blocking: string,
 ) {
-	updatedTask: ^utils.Task
 	for &task in data.tasks {
 		if task.id != id {
 			continue
@@ -164,13 +173,12 @@ update :: proc(
 			blockedTasks := strings.split(blocking, ",")
 			task.blocking = blockedTasks
 		}
-
 	}
 
 	utils.putDataFile(dataFilePath, data)
 }
 
-setStatus :: proc(data: ^utils.DataFile, dataFilePath: string, id: string, status: string) {
+setStatusForTask :: proc(data: ^utils.DataFile, dataFilePath: string, id: string, status: string) {
 	statusOk := utils.validateStatusString(status)
 
 	if !statusOk {

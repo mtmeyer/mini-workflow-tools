@@ -4,7 +4,7 @@
             "id": "abc123",
             "name": "Some test task name updated",
             "description": "Lorem ipsum dolor sit amet",
-            "status": "todo",
+            "status": "done",
             "blocking": [
 
             ]
@@ -29,12 +29,22 @@
         },
         {
             "id": "Ofmmgvs0",
-            "name": "Some heading",
+            "name": "Updated name",
             "description": "Here's a description",
             "status": "todo",
             "blocking": [
                 "abc123",
                 "asdfg321"
+            ]
+        },
+        {
+            "id": "UtcMbWvA",
+            "name": "Test task",
+            "description": "A desc",
+            "status": "todo",
+            "blocking": [
+                "abc123",
+                "xyz987"
             ]
         }
     ],

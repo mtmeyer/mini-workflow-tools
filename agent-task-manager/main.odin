@@ -35,9 +35,9 @@ main :: proc() {
 
 	switch command := opt.command; command {
 	case "tasks":
-		cmds.executeSubcommand(opt, data, filePath)
+		cmds.executeTaskSubcommand(opt, data, filePath)
 	case "scratchpad":
-		fmt.print("SCRATCHPAD")
+		cmds.executeScratchpadSubcommand(opt, data, filePath)
 	case:
 		cmds.renderHelp(.Base)
 	}
