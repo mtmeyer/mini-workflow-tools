@@ -9,7 +9,7 @@ import "core:strings"
 executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile) {
 	switch cmdString := cliOpts.subCommand; cmdString {
 	case "list":
-		list(data, cliOpts.json)
+		list(data, cliOpts.json, cliOpts.full)
 	case "create":
 		create(data)
 	case "delete":
@@ -20,7 +20,7 @@ executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile) {
 	}
 }
 
-list :: proc(data: ^utils.DataFile, jsonFlag: bool = false) {
+list :: proc(data: ^utils.DataFile, jsonFlag: bool = false, fullFlag: bool = false) {
 	tasks := data.tasks
 
 	if jsonFlag {
@@ -53,7 +53,26 @@ list :: proc(data: ^utils.DataFile, jsonFlag: bool = false) {
 				utils.truncate(task.name, 80),
 			),
 		)
+
+		if fullFlag {
+			blocking := strings.join(task.blocking, ", ")
+			append(
+				&linesToRender,
+				fmt.tprintf(
+					"    %s%sBody:%s %s\n    %s%sBlocking:%s [%s]\n",
+					cli.BOLD,
+					cli.CYAN,
+					cli.RESET,
+					task.body,
+					cli.BOLD,
+					cli.YELLOW,
+					cli.RESET,
+					blocking,
+				),
+			)
+		}
 	}
+
 
 	fmt.println(strings.join(linesToRender[:], "\n"))
 }

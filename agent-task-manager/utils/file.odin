@@ -13,6 +13,7 @@ taskStatus :: enum {
 Task :: struct {
 	id:       string,
 	name:     string,
+	body:     string,
 	status:   string,
 	blocking: []string,
 }

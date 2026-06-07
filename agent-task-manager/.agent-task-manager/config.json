@@ -3,6 +3,7 @@
     {
       "id": "abc123",
       "name": "Some test task",
+      "body": "Lorem ipsum dolor sit amet",
       "status": "todo",
       "blocking": []
     },
@@ -10,7 +11,9 @@
       "id": "xyz987",
       "name": "Some second test task",
       "status": "done",
-      "blocking": []
+      "blocking": [
+        "abc123"
+      ]
     },
     {
       "id": "123abc",
