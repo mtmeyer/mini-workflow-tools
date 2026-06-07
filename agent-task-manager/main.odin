@@ -35,7 +35,7 @@ main :: proc() {
 
 	switch command := opt.command; command {
 	case "tasks":
-		cmds.executeSubcommand(opt, data)
+		cmds.executeSubcommand(opt, data, filePath)
 	case "scratchpad":
 		fmt.print("SCRATCHPAD")
 	case:

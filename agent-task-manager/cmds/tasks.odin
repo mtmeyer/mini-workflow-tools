@@ -6,12 +6,12 @@ import "core:encoding/json"
 import "core:fmt"
 import "core:strings"
 
-executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile) {
+executeSubcommand :: proc(cliOpts: utils.Options, data: ^utils.DataFile, dataFilePath: string) {
 	switch cmdString := cliOpts.subCommand; cmdString {
 	case "list":
 		list(data, cliOpts.json, cliOpts.full)
 	case "create":
-		create(data)
+		create(data, dataFilePath, cliOpts.subCommandInput, cliOpts.description, cliOpts.blocking)
 	case "delete":
 		delete(data)
 	case:
@@ -59,11 +59,11 @@ list :: proc(data: ^utils.DataFile, jsonFlag: bool = false, fullFlag: bool = fal
 			append(
 				&linesToRender,
 				fmt.tprintf(
-					"    %s%sBody:%s %s\n    %s%sBlocking:%s [%s]\n",
+					"    %s%Description:%s %s\n    %s%sBlocking:%s [%s]\n",
 					cli.BOLD,
 					cli.CYAN,
 					cli.RESET,
-					task.body,
+					task.description,
 					cli.BOLD,
 					cli.YELLOW,
 					cli.RESET,
@@ -89,8 +89,30 @@ getOutputTaskStatus :: proc(status: string) -> string {
 	return ""
 }
 
-create :: proc(data: ^utils.DataFile) {
-	fmt.print("CREATE")
+create :: proc(
+	data: ^utils.DataFile,
+	dataFilePath: string,
+	name: string,
+	description: string,
+	blocking: string = "",
+) {
+	todoId := utils.generateId()
+
+	newTodo := utils.Task {
+		id          = todoId,
+		name        = name,
+		description = description,
+		status      = "todo",
+	}
+
+	if len(blocking) > 0 {
+		blockedTasks := strings.split(blocking, ",")
+		newTodo.blocking = blockedTasks
+	}
+
+	append(&data.tasks, newTodo)
+
+	utils.putDataFile(dataFilePath, data)
 }
 
 delete :: proc(data: ^utils.DataFile) {

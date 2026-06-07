@@ -11,11 +11,11 @@ taskStatus :: enum {
 }
 
 Task :: struct {
-	id:       string,
-	name:     string,
-	body:     string,
-	status:   string,
-	blocking: []string,
+	id:          string,
+	name:        string,
+	description: string,
+	status:      string,
+	blocking:    []string,
 }
 
 Scratchpad :: struct {
@@ -24,8 +24,8 @@ Scratchpad :: struct {
 }
 
 DataFile :: struct {
-	tasks:       []Task,
-	scratchpads: []Scratchpad,
+	tasks:       [dynamic]Task,
+	scratchpads: [dynamic]Scratchpad,
 }
 
 parseDataFile :: proc(filePath: string) -> (^DataFile, bool) {
@@ -47,4 +47,24 @@ parseDataFile :: proc(filePath: string) -> (^DataFile, bool) {
 	}
 
 	return dataFile, true
+}
+
+putDataFile :: proc(filePath: string, data: ^DataFile) -> bool {
+	fmt.printfln("%v", data)
+
+	jsonData, err := json.marshal(data^, {pretty = true, use_spaces = true, spaces = 4})
+
+	if err != nil {
+		fmt.eprintfln("Error marshalling json: %v", err)
+		return false
+	}
+
+	writeErr := os.write_entire_file(filePath, jsonData)
+
+	if writeErr != nil {
+		fmt.eprintfln("Error writing updated json data file: %v", writeErr)
+		return false
+	}
+
+	return true
 }
