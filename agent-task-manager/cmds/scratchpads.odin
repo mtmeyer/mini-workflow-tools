@@ -16,6 +16,8 @@ executeScratchpadSubcommand :: proc(
 	switch cmdString := cliOpts.subCommand; cmdString {
 	case "list":
 		listScratchpads(data, cliOpts.json, cliOpts.showArchived)
+	case "get":
+		getScratchpadById(data, cliOpts.subCommandInput, cliOpts.json)
 	case "create":
 		createScratchpad(data, dataFilePath, cliOpts.subCommandInput, cliOpts.content)
 	case "update":
@@ -75,6 +77,60 @@ listScratchpads :: proc(data: ^utils.DataFile, jsonFlag: bool = false, showArchi
 	}
 
 	fmt.println(strings.join(linesToRender[:], "\n"))
+}
+
+getScratchpadById :: proc(data: ^utils.DataFile, id: string, jsonFlag: bool) {
+	for scratchpad in data.scratchpads {
+		if scratchpad.id != id {
+			continue
+		}
+
+		if jsonFlag {
+			pretty, err := json.marshal(
+				scratchpad,
+				json.Marshal_Options{pretty = true, use_spaces = true, spaces = 4},
+			)
+
+			if err != nil {
+				fmt.eprintln(err)
+				return
+			}
+			fmt.println(string(pretty))
+			return
+		}
+
+		linesToRender: [dynamic]string
+
+		append(
+			&linesToRender,
+			fmt.tprintf(
+				"%s%s%s:%s %s",
+				cli.BOLD,
+				cli.CYAN,
+				scratchpad.id,
+				cli.RESET,
+				utils.truncate(scratchpad.name, 80),
+			),
+		)
+
+		append(
+			&linesToRender,
+			fmt.tprintf("%s%sContent:%s %s", cli.BOLD, cli.CYAN, cli.RESET, scratchpad.content),
+		)
+
+		append(
+			&linesToRender,
+			fmt.tprintf(
+				"%s%sisArchived:%s %s",
+				cli.BOLD,
+				cli.CYAN,
+				cli.RESET,
+				fmt.tprintf("%v\n", scratchpad.archived),
+			),
+		)
+
+		fmt.println(strings.join(linesToRender[:], "\n"))
+	}
 }
 
 createScratchpad :: proc(

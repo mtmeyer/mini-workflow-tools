@@ -15,6 +15,8 @@ executeTaskSubcommand :: proc(
 	switch cmdString := cliOpts.subCommand; cmdString {
 	case "list":
 		listTasks(data, cliOpts.json, cliOpts.full, cliOpts.status)
+	case "get":
+		getTaskById(data, cliOpts.subCommandInput, cliOpts.json)
 	case "create":
 		createTask(
 			data,
@@ -35,8 +37,7 @@ executeTaskSubcommand :: proc(
 	case "set-status":
 		setStatusForTask(data, dataFilePath, cliOpts.subCommandInput, cliOpts.status)
 	case:
-		// TODO: Print help for tasks subcommand
-		fmt.print("Command not supported")
+		renderHelp(.Tasks)
 	}
 }
 
@@ -124,6 +125,61 @@ getOutputTaskStatus :: proc(status: string) -> string {
 		return fmt.tprintf("%s[×]%s", cli.RED, cli.RESET)
 	}
 	return ""
+}
+
+getTaskById :: proc(data: ^utils.DataFile, id: string, jsonFlag: bool) {
+	for task in data.tasks {
+		if task.id != id {
+			continue
+		}
+
+		if jsonFlag {
+			pretty, err := json.marshal(
+				task,
+				json.Marshal_Options{pretty = true, use_spaces = true, spaces = 4},
+			)
+
+			if err != nil {
+				fmt.eprintln(err)
+				return
+			}
+			fmt.println(string(pretty))
+			return
+		}
+
+		linesToRender: [dynamic]string
+
+		append(
+			&linesToRender,
+			fmt.tprintf(
+				"%s %s%s%s:%s %s",
+				getOutputTaskStatus(task.status),
+				cli.BOLD,
+				cli.CYAN,
+				task.id,
+				cli.RESET,
+				utils.truncate(task.name, 80),
+			),
+		)
+
+		blocking := strings.join(task.blocking, ", ")
+		append(
+			&linesToRender,
+			fmt.tprintf(
+				"    %s%sDescription:%s %s\n    %s%sBlocking:%s [%s]\n",
+				cli.BOLD,
+				cli.CYAN,
+				cli.RESET,
+				task.description,
+				cli.BOLD,
+				cli.YELLOW,
+				cli.RESET,
+				blocking,
+			),
+		)
+
+		fmt.println(strings.join(linesToRender[:], "\n"))
+	}
 }
 
 createTask :: proc(
