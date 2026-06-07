@@ -2,7 +2,7 @@ package cli
 
 import "base:runtime"
 import "core:fmt"
-import "core:os/os2"
+import "core:os"
 import "core:sys/posix"
 import "core:time"
 
@@ -42,5 +42,5 @@ reset_cursor :: proc "c" (_: posix.Signal) {
 	context = runtime.default_context()
 	fmt.println("Running cleanup")
 	fmt.printf("\x1B[?25h")
-	os2.exit(0)
+	os.exit(0)
 }

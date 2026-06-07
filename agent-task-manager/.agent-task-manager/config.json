@@ -1,0 +1,23 @@
+{
+  "tasks": [
+    {
+      "id": "abc123",
+      "name": "Some test task",
+      "status": "todo",
+      "blocking": []
+    },
+    {
+      "id": "xyz987",
+      "name": "Some second test task",
+      "status": "done",
+      "blocking": []
+    },
+    {
+      "id": "123abc",
+      "name": "Some third test task",
+      "status": "cancelled",
+      "blocking": []
+    },
+  ],
+  "scratchPads": []
+}
